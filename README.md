@@ -44,8 +44,8 @@ npx cdk deploy
 ```
 
 4. Configure SES "From" address:
-   - Verify a sender email or domain in SES.
-   - Update `SES_FROM_EMAIL` in `lib/santa-stack.ts` to that verified address before deploying.
+   - Verify a sender email or domain in SES (e.g., `zambezipro@gmail.com`).
+   - Confirm `SES_FROM_EMAIL` in `lib/santa-stack.ts` is set to that verified address before deploying.
 
 5. After deployment, update `frontend/app.js` with your API URL:
 ```javascript

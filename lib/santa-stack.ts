@@ -142,5 +142,10 @@ export class SantaStack extends cdk.Stack {
       value: api.url,
       description: 'API Gateway URL',
     });
+
+    new cdk.CfnOutput(this, 'FromEmail', {
+      value: lambdaEnv.SES_FROM_EMAIL,
+      description: 'SES sender email address',
+    });
   }
 }
