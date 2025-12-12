@@ -31,7 +31,7 @@ function switchTab(tabId) {
   });
   
   // Load participants when switching to that tab
-  if (tabId === 'participants' || tabId === 'admin') {
+  if (tabId === 'participants') {
     loadParticipants();
   }
 }
@@ -197,7 +197,11 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Form submission
   document.getElementById('registerForm').addEventListener('submit', registerParticipant);
-  
-  // Randomize button
-  document.getElementById('randomizeBtn').addEventListener('click', randomizeSecretSanta);
+});
+
+// Optional: allow manual trigger via console if admin UI is hidden
+const randomizeBtn = document.getElementById('randomizeBtn');
+if (randomizeBtn) {
+  randomizeBtn.addEventListener('click', randomizeSecretSanta);
+}
 });
