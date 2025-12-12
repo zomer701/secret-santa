@@ -6,7 +6,6 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
-import * as sns from 'aws-cdk-lib/aws-sns';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
 import * as path from 'path';
@@ -20,11 +19,6 @@ export class SantaStack extends cdk.Stack {
       partitionKey: { name: 'email', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
-    });
-
-    // SNS Topic for notifications
-    const notificationTopic = new sns.Topic(this, 'SecretSantaTopic', {
-      displayName: 'Secret Santa Notifications',
     });
 
     // S3 bucket for frontend
@@ -54,7 +48,7 @@ export class SantaStack extends cdk.Stack {
     // Lambda environment variables
     const lambdaEnv = {
       TABLE_NAME: participantsTable.tableName,
-      SNS_TOPIC_ARN: notificationTopic.topicArn,
+      SES_FROM_EMAIL: 'zambezipro@gmail.com', // ensure this sender is verified in SES
     };
 
     // Register Lambda
@@ -98,8 +92,10 @@ export class SantaStack extends cdk.Stack {
     participantsTable.grantReadData(listLambda);
     participantsTable.grantReadWriteData(removeLambda);
     participantsTable.grantReadData(randomizeLambda);
-    notificationTopic.grantPublish(randomizeLambda);
-    notificationTopic.grantSubscribe(registerLambda);
+    randomizeLambda.addToRolePolicy(new iam.PolicyStatement({
+      actions: ['ses:SendEmail', 'ses:SendRawEmail'],
+      resources: ['*'],
+    }));
 
     // API Gateway
     const api = new apigateway.RestApi(this, 'SecretSantaApi', {

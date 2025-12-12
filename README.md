@@ -1,13 +1,13 @@
 # 🎅 Secret Santa App
 
-A festive Secret Santa application built with AWS CDK, featuring a beautiful Christmas-themed UI and SNS email notifications.
+A festive Secret Santa application built with AWS CDK, featuring a beautiful Christmas-themed UI and SES email notifications.
 
 ## Features
 
 - 🎁 **Registration Form** - Participants can sign up with name, email, and wishlist
 - 👥 **Participants List** - View all registered participants with remove functionality
 - 🎲 **Random Assignment** - Automatically assign Secret Santas ensuring no one gets themselves
-- 📧 **Email Notifications** - Beautiful Christmas-styled emails via AWS SNS
+- 📧 **Email Notifications** - Beautiful Christmas-styled emails via AWS SES
 - ❄️ **Festive UI** - Animated snowflakes, Christmas colors, and holiday decorations
 
 ## Architecture
@@ -15,7 +15,7 @@ A festive Secret Santa application built with AWS CDK, featuring a beautiful Chr
 - **Frontend**: Static website hosted on S3 + CloudFront
 - **Backend**: API Gateway + Lambda functions
 - **Database**: DynamoDB
-- **Notifications**: AWS SNS
+- **Notifications**: AWS SES
 
 ## API Endpoints
 
@@ -43,12 +43,16 @@ npm run build
 npx cdk deploy
 ```
 
-4. After deployment, update `frontend/app.js` with your API URL:
+4. Configure SES "From" address:
+   - Verify a sender email or domain in SES.
+   - Update `SES_FROM_EMAIL` in `lib/santa-stack.ts` to that verified address before deploying.
+
+5. After deployment, update `frontend/app.js` with your API URL:
 ```javascript
 const API_URL = 'https://xxxxx.execute-api.us-east-1.amazonaws.com/prod';
 ```
 
-5. Redeploy to update the frontend:
+6. Redeploy to update the frontend:
 ```bash
 npx cdk deploy
 ```
@@ -57,9 +61,8 @@ npx cdk deploy
 
 1. Share the CloudFront URL with participants
 2. Participants register with their name, email, and wishlist
-3. They must confirm their SNS email subscription
-4. When ready, use the Admin tab to trigger Secret Santa assignments
-5. Everyone receives a festive email with their assignment!
+3. Trigger assignments via POST to `/randomize` (e.g., `curl -X POST "$API_URL/randomize"`)
+4. Everyone receives a festive email with their assignment!
 
 ## Local Development
 
