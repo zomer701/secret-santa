@@ -14,6 +14,14 @@ export class SantaStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
+    const gmailUser = process.env.GMAIL_USER;
+    const gmailClientId = process.env.GMAIL_CLIENT_ID;
+    const gmailClientSecret = process.env.GMAIL_CLIENT_SECRET;
+    const gmailRefreshToken = process.env.GMAIL_REFRESH_TOKEN;
+    if (!gmailUser || !gmailClientId || !gmailClientSecret || !gmailRefreshToken) {
+      throw new Error('GMAIL_USER, GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, and GMAIL_REFRESH_TOKEN must be set in the environment before deploying.');
+    }
+
     // DynamoDB table for participants
     const participantsTable = new dynamodb.Table(this, 'ParticipantsTable', {
       partitionKey: { name: 'email', type: dynamodb.AttributeType.STRING },
@@ -48,14 +56,30 @@ export class SantaStack extends cdk.Stack {
     // Lambda environment variables
     const lambdaEnv = {
       TABLE_NAME: participantsTable.tableName,
-      SES_FROM_EMAIL: 'zambezipro@gmail.com', // ensure this sender is verified in SES
+      GMAIL_USER: gmailUser,
+      GMAIL_CLIENT_ID: gmailClientId,
+      GMAIL_CLIENT_SECRET: gmailClientSecret,
+      GMAIL_REFRESH_TOKEN: gmailRefreshToken,
     };
 
     // Register Lambda
     const registerLambda = new lambda.Function(this, 'RegisterLambda', {
       runtime: lambda.Runtime.NODEJS_18_X,
       handler: 'index.handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, '../lambda/register')),
+      code: lambda.Code.fromAsset(path.join(__dirname, '../lambda/register'), {
+        bundling: {
+          image: lambda.Runtime.NODEJS_18_X.bundlingImage,
+          command: [
+            'bash',
+            '-c',
+            [
+              'cd /asset-input',
+              'npm install nodemailer',
+              'cp -R . /asset-output',
+            ].join(' && '),
+          ],
+        },
+      }),
       environment: lambdaEnv,
       timeout: cdk.Duration.seconds(10),
     });
@@ -82,7 +106,20 @@ export class SantaStack extends cdk.Stack {
     const randomizeLambda = new lambda.Function(this, 'RandomizeLambda', {
       runtime: lambda.Runtime.NODEJS_18_X,
       handler: 'index.handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, '../lambda/randomize')),
+      code: lambda.Code.fromAsset(path.join(__dirname, '../lambda/randomize'), {
+        bundling: {
+          image: lambda.Runtime.NODEJS_18_X.bundlingImage,
+          command: [
+            'bash',
+            '-c',
+            [
+              'cd /asset-input',
+              'npm install nodemailer',
+              'cp -R . /asset-output',
+            ].join(' && '),
+          ],
+        },
+      }),
       environment: lambdaEnv,
       timeout: cdk.Duration.seconds(30),
     });
@@ -92,10 +129,6 @@ export class SantaStack extends cdk.Stack {
     participantsTable.grantReadData(listLambda);
     participantsTable.grantReadWriteData(removeLambda);
     participantsTable.grantReadData(randomizeLambda);
-    randomizeLambda.addToRolePolicy(new iam.PolicyStatement({
-      actions: ['ses:SendEmail', 'ses:SendRawEmail'],
-      resources: ['*'],
-    }));
 
     // API Gateway
     const api = new apigateway.RestApi(this, 'SecretSantaApi', {
@@ -141,11 +174,6 @@ export class SantaStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'ApiURL', {
       value: api.url,
       description: 'API Gateway URL',
-    });
-
-    new cdk.CfnOutput(this, 'FromEmail', {
-      value: lambdaEnv.SES_FROM_EMAIL,
-      description: 'SES sender email address',
     });
   }
 }

@@ -59,9 +59,9 @@ async function loadParticipants() {
       <div class="participant-item">
         <div>
           <span class="participant-name">${escapeHtml(p.name)}</span>
-          ${p.telegram ? `<div class="participant-meta">@${escapeHtml(p.telegram)}</div>` : ''}
+          ${p.email ? `<div class="participant-meta">${escapeHtml(p.email)}</div>` : ''}
         </div>
-        <button class="btn btn-danger" onclick="removeParticipant('${escapeHtml(p.telegram)}')">
+        <button class="btn btn-danger" onclick="removeParticipant('${escapeHtml(p.email)}')">
           Remove
         </button>
       </div>
@@ -100,8 +100,8 @@ async function registerParticipant(event) {
   
   const formData = {
     name: form.name.value.trim(),
+    email: form.email.value.trim().toLowerCase(),
     wishlist: form.wishlist.value.trim(),
-    telegram: form.telegram.value.trim(),
   };
   
   try {
@@ -117,7 +117,7 @@ async function registerParticipant(event) {
       throw new Error(data.error || 'Registration failed');
     }
     
-    showToast('🎉 Registration successful! Watch Telegram for your assignment.', 'success');
+    showToast('🎉 Registration successful! Watch your email for your assignment.', 'success');
     form.reset();
     switchTab('participants');
   } catch (error) {
@@ -131,15 +131,15 @@ async function registerParticipant(event) {
 
 /**
  * Remove a participant
- * @param {string} telegram - Telegram of participant to remove
+ * @param {string} email - Email of participant to remove
  */
-async function removeParticipant(telegram) {
+async function removeParticipant(email) {
   if (!confirm('Are you sure you want to remove this participant?')) {
     return;
   }
   
   try {
-    const response = await fetch(`${API_URL}/participants/${encodeURIComponent(telegram)}`, {
+    const response = await fetch(`${API_URL}/participants/${encodeURIComponent(email)}`, {
       method: 'DELETE',
     });
     
@@ -160,7 +160,7 @@ async function removeParticipant(telegram) {
  * Trigger Secret Santa randomization
  */
 async function randomizeSecretSanta() {
-  if (!confirm('🎅 Ready to assign Secret Santas?\n\nThis will send Telegram messages to ALL participants with their assignments.\n\nAre you sure?')) {
+  if (!confirm('🎅 Ready to assign Secret Santas?\n\nThis will send emails to ALL participants with their assignments.\n\nAre you sure?')) {
     return;
   }
   

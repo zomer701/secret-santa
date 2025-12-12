@@ -1,13 +1,13 @@
 # 🎅 Secret Santa App
 
-A festive Secret Santa application built with AWS CDK, featuring a beautiful Christmas-themed UI and Telegram notifications.
+A festive Secret Santa application built with AWS CDK, featuring a beautiful Christmas-themed UI and email notifications (via Gmail SMTP).
 
 ## Features
 
-- 🎁 **Registration Form** - Participants can sign up with name, Telegram handle/chat ID, and wishlist
+- 🎁 **Registration Form** - Participants can sign up with name, email, and wishlist
 - 👥 **Participants List** - View all registered participants with remove functionality
 - 🎲 **Random Assignment** - Automatically assign Secret Santas ensuring no one gets themselves
-- 📱 **Telegram Notifications** - Welcome messages on registration and assignments via Telegram bot
+- 📧 **Email Notifications** - Welcome messages on registration and assignments via Gmail
 - ❄️ **Festive UI** - Animated snowflakes, Christmas colors, and holiday decorations
 
 ## Architecture
@@ -15,16 +15,16 @@ A festive Secret Santa application built with AWS CDK, featuring a beautiful Chr
 - **Frontend**: Static website hosted on S3 + CloudFront
 - **Backend**: API Gateway + Lambda functions
 - **Database**: DynamoDB
-- **Notifications**: Telegram Bot API
+- **Notifications**: Gmail SMTP (nodemailer)
 
 ## API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/participants` | Register a new participant (requires Telegram handle/chat ID) |
+| POST | `/participants` | Register a new participant (requires name + email) |
 | GET | `/participants` | List all participants |
-| DELETE | `/participants/{telegram}` | Remove a participant |
-| POST | `/randomize` | Assign Secret Santas and send Telegram notifications |
+| DELETE | `/participants/{email}` | Remove a participant |
+| POST | `/randomize` | Assign Secret Santas and send email notifications |
 
 ## Deployment
 
@@ -38,15 +38,18 @@ npm install
 npm run build
 ```
 
-3. Deploy to AWS:
+3. Deploy to AWS (requires Gmail API OAuth env vars):
 ```bash
-export TELEGRAM_BOT_TOKEN=your_bot_token_here
+export GMAIL_USER="your@gmail.com"
+export GMAIL_CLIENT_ID="your_google_client_id"
+export GMAIL_CLIENT_SECRET="your_google_client_secret"
+export GMAIL_REFRESH_TOKEN="your_google_refresh_token"
 npx cdk deploy
 ```
 
-4. Configure Telegram bot:
-   - Create a bot with @BotFather and grab the bot token.
-   - Set `TELEGRAM_BOT_TOKEN` in your shell before deploying (required).
+4. Configure Gmail API:
+   - Create OAuth credentials in Google Cloud, enable Gmail API, and obtain client ID/secret + a refresh token for `GMAIL_USER`.
+   - Set `GMAIL_USER`, `GMAIL_CLIENT_ID`, `GMAIL_CLIENT_SECRET`, and `GMAIL_REFRESH_TOKEN` in your shell when deploying.
 
 5. After deployment, update `frontend/app.js` with your API URL:
 ```javascript
@@ -61,9 +64,9 @@ npx cdk deploy
 ## Usage
 
 1. Share the CloudFront URL with participants
-2. Participants register with their name, Telegram handle/chat ID, and wishlist
+2. Participants register with their name, email, and wishlist
 3. Trigger assignments via POST to `/randomize` (e.g., `curl -X POST "$API_URL/randomize"`)
-4. Everyone receives a Telegram message with their assignment!
+4. Everyone receives an email with their assignment!
 
 ## Local Development
 
