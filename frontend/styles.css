@@ -299,6 +299,11 @@ body {
   content: '🎁';
 }
 
+.participant-meta {
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
 .loading, .empty-state {
   text-align: center;
   padding: 40px;
