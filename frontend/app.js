@@ -204,4 +204,3 @@ const randomizeBtn = document.getElementById('randomizeBtn');
 if (randomizeBtn) {
   randomizeBtn.addEventListener('click', randomizeSecretSanta);
 }
-});
