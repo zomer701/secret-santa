@@ -1,13 +1,13 @@
 # 🎅 Secret Santa App
 
-A festive Secret Santa application built with AWS CDK, featuring a beautiful Christmas-themed UI and email notifications (via Gmail SMTP).
+A festive Secret Santa application built with AWS CDK, featuring a beautiful Christmas-themed UI and email notifications (via Gmail SMTP + nodemailer).
 
 ## Features
 
 - 🎁 **Registration Form** - Participants can sign up with name, email, and wishlist
 - 👥 **Participants List** - View all registered participants with remove functionality
 - 🎲 **Random Assignment** - Automatically assign Secret Santas ensuring no one gets themselves
-- 📧 **Email Notifications** - Welcome messages on registration and assignments via Gmail
+- 📧 **Email Notifications** - Welcome messages on registration and assignments via Gmail SMTP
 - ❄️ **Festive UI** - Animated snowflakes, Christmas colors, and holiday decorations
 
 ## Architecture
@@ -38,18 +38,16 @@ npm install
 npm run build
 ```
 
-3. Deploy to AWS (requires Gmail API OAuth env vars):
+3. Deploy to AWS (requires Gmail SMTP env vars):
 ```bash
 export GMAIL_USER="your@gmail.com"
-export GMAIL_CLIENT_ID="your_google_client_id"
-export GMAIL_CLIENT_SECRET="your_google_client_secret"
-export GMAIL_REFRESH_TOKEN="your_google_refresh_token"
+export GMAIL_PASS="your_app_password"
 npx cdk deploy
 ```
 
-4. Configure Gmail API:
-   - Create OAuth credentials in Google Cloud, enable Gmail API, and obtain client ID/secret + a refresh token for `GMAIL_USER`.
-   - Set `GMAIL_USER`, `GMAIL_CLIENT_ID`, `GMAIL_CLIENT_SECRET`, and `GMAIL_REFRESH_TOKEN` in your shell when deploying.
+4. Configure Gmail:
+   - Enable 2FA and create an app password for the sending account; use it as `GMAIL_PASS`.
+   - Set `GMAIL_USER` and `GMAIL_PASS` in your shell when deploying.
 
 5. After deployment, update `frontend/app.js` with your API URL:
 ```javascript

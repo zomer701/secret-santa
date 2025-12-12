@@ -9,17 +9,17 @@ import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
 import * as path from 'path';
+import * as fs from 'fs';
+import { execSync } from 'child_process';
 
 export class SantaStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
     const gmailUser = process.env.GMAIL_USER;
-    const gmailClientId = process.env.GMAIL_CLIENT_ID;
-    const gmailClientSecret = process.env.GMAIL_CLIENT_SECRET;
-    const gmailRefreshToken = process.env.GMAIL_REFRESH_TOKEN;
-    if (!gmailUser || !gmailClientId || !gmailClientSecret || !gmailRefreshToken) {
-      throw new Error('GMAIL_USER, GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, and GMAIL_REFRESH_TOKEN must be set in the environment before deploying.');
+    const gmailPass = process.env.GMAIL_PASS;
+    if (!gmailUser || !gmailPass) {
+      throw new Error('GMAIL_USER and GMAIL_PASS must be set in the environment before deploying.');
     }
 
     // DynamoDB table for participants
@@ -57,28 +57,40 @@ export class SantaStack extends cdk.Stack {
     const lambdaEnv = {
       TABLE_NAME: participantsTable.tableName,
       GMAIL_USER: gmailUser,
-      GMAIL_CLIENT_ID: gmailClientId,
-      GMAIL_CLIENT_SECRET: gmailClientSecret,
-      GMAIL_REFRESH_TOKEN: gmailRefreshToken,
+      GMAIL_PASS: gmailPass,
     };
+
+    const createBundling = (entryDir: string) => ({
+      local: {
+        tryBundle(outputDir: string) {
+          try {
+            execSync('npm install', { cwd: entryDir, stdio: 'inherit' });
+            fs.cpSync(entryDir, outputDir, { recursive: true });
+            return true;
+          } catch (err) {
+            console.warn('Local bundling failed, falling back to Docker bundling.', err);
+            return false;
+          }
+        },
+      },
+      image: lambda.Runtime.NODEJS_18_X.bundlingImage,
+      command: [
+        'bash',
+        '-c',
+        [
+          'cd /asset-input',
+          'npm install',
+          'cp -R . /asset-output',
+        ].join(' && '),
+      ],
+    });
 
     // Register Lambda
     const registerLambda = new lambda.Function(this, 'RegisterLambda', {
       runtime: lambda.Runtime.NODEJS_18_X,
       handler: 'index.handler',
       code: lambda.Code.fromAsset(path.join(__dirname, '../lambda/register'), {
-        bundling: {
-          image: lambda.Runtime.NODEJS_18_X.bundlingImage,
-          command: [
-            'bash',
-            '-c',
-            [
-              'cd /asset-input',
-              'npm install nodemailer',
-              'cp -R . /asset-output',
-            ].join(' && '),
-          ],
-        },
+        bundling: createBundling(path.join(__dirname, '../lambda/register')),
       }),
       environment: lambdaEnv,
       timeout: cdk.Duration.seconds(10),
@@ -107,18 +119,7 @@ export class SantaStack extends cdk.Stack {
       runtime: lambda.Runtime.NODEJS_18_X,
       handler: 'index.handler',
       code: lambda.Code.fromAsset(path.join(__dirname, '../lambda/randomize'), {
-        bundling: {
-          image: lambda.Runtime.NODEJS_18_X.bundlingImage,
-          command: [
-            'bash',
-            '-c',
-            [
-              'cd /asset-input',
-              'npm install nodemailer',
-              'cp -R . /asset-output',
-            ].join(' && '),
-          ],
-        },
+        bundling: createBundling(path.join(__dirname, '../lambda/randomize')),
       }),
       environment: lambdaEnv,
       timeout: cdk.Duration.seconds(30),
