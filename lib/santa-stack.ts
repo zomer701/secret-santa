@@ -99,6 +99,7 @@ export class SantaStack extends cdk.Stack {
     participantsTable.grantReadWriteData(removeLambda);
     participantsTable.grantReadData(randomizeLambda);
     notificationTopic.grantPublish(randomizeLambda);
+    notificationTopic.grantSubscribe(registerLambda);
 
     // API Gateway
     const api = new apigateway.RestApi(this, 'SecretSantaApi', {
