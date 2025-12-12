@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎅 Secret Santa 🎄</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@400;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Snowflakes -->
+  <div class="snowflakes" aria-hidden="true">
+    <div class="snowflake">❅</div>
+    <div class="snowflake">❆</div>
+    <div class="snowflake">❅</div>
+    <div class="snowflake">❆</div>
+    <div class="snowflake">❅</div>
+    <div class="snowflake">❆</div>
+    <div class="snowflake">❅</div>
+    <div class="snowflake">❆</div>
+    <div class="snowflake">❅</div>
+    <div class="snowflake">❆</div>
+  </div>
+
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-decoration">🎄</div>
+      <h1>Secret Santa</h1>
+      <p class="subtitle">✨ Spread the Holiday Joy! ✨</p>
+      <div class="header-decoration">🎄</div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="tabs">
+      <button class="tab active" data-tab="register">🎁 Join</button>
+      <button class="tab" data-tab="participants">👥 Participants</button>
+      <button class="tab" data-tab="admin">🎅 Admin</button>
+    </nav>
+
+    <!-- Register Tab -->
+    <section id="register" class="tab-content active">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-icon">🎁</span>
+          <h2>Join Secret Santa in Solaris House</h2>
+        </div>
+        <form id="registerForm">
+          <div class="form-group">
+            <label for="name">Your Name</label>
+            <input type="text" id="name" name="name" placeholder="Santa Claus" required>
+          </div>
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" placeholder="santa@northpole.com" required>
+          </div>
+          <div class="form-group">
+            <label for="wishlist">Gift Wishlist (Optional)</label>
+            <textarea id="wishlist" name="wishlist" rows="3" placeholder="What would make your holiday magical? 🎄"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">
+            <span>🎅</span> Join the Fun!
+          </button>
+        </form>
+      </div>
+    </section>
+
+
+    <!-- Participants Tab -->
+    <section id="participants" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-icon">👥</span>
+          <h2>Santa's Nice List</h2>
+        </div>
+        <div id="participantsList" class="participants-list">
+          <p class="loading">Loading participants... 🎄</p>
+        </div>
+        <div class="card-footer">
+          <p>Want to join? <a href="#" onclick="switchTab('register')">Register here!</a></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Admin Tab -->
+    <section id="admin" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-icon">🎅</span>
+          <h2>Santa's Workshop</h2>
+        </div>
+        <div class="admin-section">
+          <p>Ready to assign Secret Santas? Make sure everyone has registered!</p>
+          <button id="randomizeBtn" class="btn btn-magic">
+            <span>✨</span> Assign Secret Santas!
+          </button>
+          <p class="warning">⚠️ This will send emails to all participants with their assignments!</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>🎄 Made with ❤️ for the Holiday Season 🎄</p>
+      <p class="footer-icons">⛄ 🦌 🔔 ❄️ 🎁 🍪</p>
+    </footer>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,8 +1,38 @@
 *.js
 !jest.config.js
+!frontend/*.js
 *.d.ts
 node_modules
 
 # CDK asset staging directory
 .cdk.staging
 cdk.out
+cdk.context.json
+
+# Generated config (auto-created by CDK)
+frontend/config.js
+
+# Frontend temp/build artifacts
+frontend/.cache/
+frontend/.tmp/
+frontend/tmp/
+frontend/temp/
+frontend/dist/
+frontend/build/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test coverage
+coverage/
